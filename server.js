@@ -85,9 +85,14 @@ app.get('/r/:cardId', async (req, res) => {
 // Lightweight health check for Render/Vercel uptime probes.
 app.get('/healthz', (_req, res) => res.status(200).send('ok'));
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Redirect server listening on port ${PORT}`);
-});
+// On Vercel, the platform imports `app` directly and calls it as a serverless
+// function — it must NOT also call app.listen(). Locally (and on Render),
+// there's no VERCEL env var, so this starts a normal always-on server.
+if (!process.env.VERCEL) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Redirect server listening on port ${PORT}`);
+  });
+}
 
 module.exports = app;
