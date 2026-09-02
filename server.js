@@ -53,18 +53,20 @@ function escapeHtml(text) {
     .replace(/"/g, '&quot;');
 }
 
-// Icon + brand-ish color per platform type. Emoji icons keep this dependency-free
-// (no external logo images to host, no trademark concerns).
+// Real brand logos via Simple Icons (cdn.simpleicons.org) — a free, open icon
+// service made specifically for showing a platform's real logo to indicate
+// "this links to our X page." Generic categories (menu/website/other) keep a
+// plain emoji since there's no brand to represent there.
 const PLATFORM_STYLES = {
-  google: { icon: '⭐', color: '#4285F4', text: '#ffffff' },
-  facebook: { icon: '👍', color: '#1877F2', text: '#ffffff' },
-  instagram: { icon: '📸', color: '#C13584', text: '#ffffff' },
-  snapchat: { icon: '👻', color: '#FFFC00', text: '#111111' },
-  tiktok: { icon: '🎵', color: '#111111', text: '#ffffff' },
-  whatsapp: { icon: '💬', color: '#25D366', text: '#ffffff' },
-  menu: { icon: '📋', color: '#6b7280', text: '#ffffff' },
-  website: { icon: '🌐', color: '#6b7280', text: '#ffffff' },
-  other: { icon: '🔗', color: '#6b7280', text: '#ffffff' },
+  google: { logoSlug: 'google', icon: null, color: '#4285F4', text: '#ffffff' },
+  facebook: { logoSlug: 'facebook', icon: null, color: '#1877F2', text: '#ffffff' },
+  instagram: { logoSlug: 'instagram', icon: null, color: '#C13584', text: '#ffffff' },
+  snapchat: { logoSlug: 'snapchat', icon: null, color: '#FFFC00', text: '#111111' },
+  tiktok: { logoSlug: 'tiktok', icon: null, color: '#111111', text: '#ffffff' },
+  whatsapp: { logoSlug: 'whatsapp', icon: null, color: '#25D366', text: '#ffffff' },
+  menu: { logoSlug: null, icon: '📋', color: '#6b7280', text: '#ffffff' },
+  website: { logoSlug: null, icon: '🌐', color: '#6b7280', text: '#ffffff' },
+  other: { logoSlug: null, icon: '🔗', color: '#6b7280', text: '#ffffff' },
 };
 
 const THEMES = {
@@ -79,9 +81,13 @@ function renderLinksPage(cardId, links, themeName, storeName) {
   const buttons = links
     .map((link) => {
       const style = PLATFORM_STYLES[link.type] || PLATFORM_STYLES.other;
+      // White version of the logo (readable on any brand color background).
+      const iconHtml = style.logoSlug
+        ? `<img class="icon" src="https://cdn.simpleicons.org/${style.logoSlug}/${style.text.replace('#', '')}" alt="" width="20" height="20" />`
+        : `<span class="icon">${style.icon}</span>`;
       return `
       <a class="btn" href="${escapeHtml(link.url)}" style="background:${style.color};color:${style.text};">
-        <span class="icon">${style.icon}</span> ${escapeHtml(link.label || 'Open Link')}
+        ${iconHtml} ${escapeHtml(link.label || 'Open Link')}
       </a>`;
     })
     .join('\n');
@@ -123,7 +129,10 @@ function renderLinksPage(cardId, links, themeName, storeName) {
       text-align: center;
       box-shadow: 0 1px 3px rgba(0,0,0,0.15);
     }
-    .icon { margin-right: 6px; }
+    .icon {
+      margin-right: 8px;
+      vertical-align: middle;
+    }
     .btn:active { opacity: 0.85; }
   </style>
 </head>
