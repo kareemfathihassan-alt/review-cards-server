@@ -69,25 +69,80 @@ const PLATFORM_STYLES = {
   other: { logoSlug: null, icon: '🔗', color: '#6b7280', text: '#ffffff' },
 };
 
+// A handful of ready-made visual templates, like Linktree's theme picker —
+// each is just a background + accent color combo, no extra assets needed.
 const THEMES = {
-  light: { bg: '#f5f5f7', heading: '#333333', cardBg: '#ffffff', border: '#dddddd' },
-  dark: { bg: '#121212', heading: '#f0f0f0', cardBg: '#1e1e1e', border: '#333333' },
+  light: {
+    background: '#f5f5f7',
+    heading: '#1a1a1a',
+    subtext: '#666666',
+    avatarBg: '#4285F4',
+    buttonBg: 'rgba(255,255,255,0.9)',
+    buttonBorder: 'rgba(0,0,0,0.08)',
+    buttonText: '#1a1a1a',
+  },
+  dark: {
+    background: '#0f0f0f',
+    heading: '#f5f5f5',
+    subtext: '#a0a0a0',
+    avatarBg: '#4285F4',
+    buttonBg: 'rgba(255,255,255,0.08)',
+    buttonBorder: 'rgba(255,255,255,0.12)',
+    buttonText: '#f5f5f5',
+  },
+  sunset: {
+    background: 'linear-gradient(160deg, #ff7e5f 0%, #feb47b 50%, #ff6a88 100%)',
+    heading: '#ffffff',
+    subtext: 'rgba(255,255,255,0.85)',
+    avatarBg: 'rgba(255,255,255,0.25)',
+    buttonBg: 'rgba(255,255,255,0.92)',
+    buttonBorder: 'rgba(255,255,255,0.5)',
+    buttonText: '#1a1a1a',
+  },
+  ocean: {
+    background: 'linear-gradient(160deg, #2193b0 0%, #6dd5ed 100%)',
+    heading: '#ffffff',
+    subtext: 'rgba(255,255,255,0.85)',
+    avatarBg: 'rgba(255,255,255,0.25)',
+    buttonBg: 'rgba(255,255,255,0.92)',
+    buttonBorder: 'rgba(255,255,255,0.5)',
+    buttonText: '#1a1a1a',
+  },
+  forest: {
+    background: 'linear-gradient(160deg, #134e5e 0%, #71b280 100%)',
+    heading: '#ffffff',
+    subtext: 'rgba(255,255,255,0.85)',
+    avatarBg: 'rgba(255,255,255,0.25)',
+    buttonBg: 'rgba(255,255,255,0.92)',
+    buttonBorder: 'rgba(255,255,255,0.5)',
+    buttonText: '#1a1a1a',
+  },
+  midnight: {
+    background: 'linear-gradient(160deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
+    heading: '#ffffff',
+    subtext: 'rgba(255,255,255,0.7)',
+    avatarBg: 'rgba(255,255,255,0.15)',
+    buttonBg: 'rgba(255,255,255,0.1)',
+    buttonBorder: 'rgba(255,255,255,0.2)',
+    buttonText: '#ffffff',
+  },
 };
 
 function renderLinksPage(cardId, links, themeName, storeName) {
   const theme = THEMES[themeName] || THEMES.light;
   const heading = storeName ? escapeHtml(storeName) : 'Choose an option';
+  const initial = storeName ? escapeHtml(storeName.trim().charAt(0).toUpperCase()) : '📍';
 
   const buttons = links
     .map((link) => {
       const style = PLATFORM_STYLES[link.type] || PLATFORM_STYLES.other;
-      // White version of the logo (readable on any brand color background).
       const iconHtml = style.logoSlug
-        ? `<img class="icon" src="https://cdn.simpleicons.org/${style.logoSlug}/${style.text.replace('#', '')}" alt="" width="20" height="20" />`
+        ? `<img class="icon" src="https://cdn.simpleicons.org/${style.logoSlug}" alt="" width="22" height="22" />`
         : `<span class="icon">${style.icon}</span>`;
       return `
-      <a class="btn" href="${escapeHtml(link.url)}" style="background:${style.color};color:${style.text};">
-        ${iconHtml} ${escapeHtml(link.label || 'Open Link')}
+      <a class="btn" href="${escapeHtml(link.url)}">
+        <span class="btn-icon-wrap">${iconHtml}</span>
+        <span class="btn-label">${escapeHtml(link.label || 'Open Link')}</span>
       </a>`;
     })
     .join('\n');
@@ -98,47 +153,96 @@ function renderLinksPage(cardId, links, themeName, storeName) {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${heading}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
+    * { box-sizing: border-box; }
     body {
-      font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: ${theme.bg};
+      font-family: 'Poppins', -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: ${theme.background};
+      min-height: 100vh;
       margin: 0;
-      padding: 32px 16px;
+      padding: 48px 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
+    .avatar {
+      width: 84px;
+      height: 84px;
+      border-radius: 50%;
+      background: ${theme.avatarBg};
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
     h1 {
-      font-size: 18px;
+      font-size: 22px;
+      font-weight: 700;
       color: ${theme.heading};
-      margin-bottom: 24px;
+      margin: 0 0 4px 0;
       text-align: center;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: ${theme.subtext};
+      margin: 0 0 28px 0;
+      text-align: center;
+    }
+    .links {
+      width: 100%;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
     .btn {
-      display: block;
+      display: flex;
+      align-items: center;
       width: 100%;
-      max-width: 360px;
-      box-sizing: border-box;
+      background: ${theme.buttonBg};
+      backdrop-filter: blur(8px);
+      color: ${theme.buttonText};
       text-decoration: none;
-      padding: 16px 20px;
-      margin-bottom: 12px;
-      border-radius: 12px;
-      border: 1px solid ${theme.border};
-      font-size: 16px;
+      padding: 14px 18px;
+      border-radius: 14px;
+      border: 1px solid ${theme.buttonBorder};
+      font-size: 15px;
       font-weight: 600;
-      text-align: center;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
     }
-    .icon {
-      margin-right: 8px;
-      vertical-align: middle;
+    .btn:active {
+      transform: scale(0.97);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.12);
     }
-    .btn:active { opacity: 0.85; }
+    .btn-icon-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+    .icon { display: block; }
+    .btn-label {
+      flex: 1;
+      text-align: left;
+    }
   </style>
 </head>
 <body>
+  <div class="avatar">${initial}</div>
   <h1>${heading}</h1>
-  ${buttons}
+  <p class="subtitle">Tap an option below</p>
+  <div class="links">
+    ${buttons}
+  </div>
 </body>
 </html>`;
 }
