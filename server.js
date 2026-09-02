@@ -72,8 +72,9 @@ const THEMES = {
   dark: { bg: '#121212', heading: '#f0f0f0', cardBg: '#1e1e1e', border: '#333333' },
 };
 
-function renderLinksPage(cardId, links, themeName) {
+function renderLinksPage(cardId, links, themeName, storeName) {
   const theme = THEMES[themeName] || THEMES.light;
+  const heading = storeName ? escapeHtml(storeName) : 'Choose an option';
 
   const buttons = links
     .map((link) => {
@@ -90,7 +91,7 @@ function renderLinksPage(cardId, links, themeName) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Choose an option</title>
+  <title>${heading}</title>
   <style>
     body {
       font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -127,7 +128,7 @@ function renderLinksPage(cardId, links, themeName) {
   </style>
 </head>
 <body>
-  <h1>Choose an option</h1>
+  <h1>${heading}</h1>
   ${buttons}
 </body>
 </html>`;
@@ -160,7 +161,7 @@ app.get('/r/:cardId', async (req, res) => {
       return res.redirect(302, links[0].url);
     }
 
-    return res.status(200).send(renderLinksPage(cardId, links, card.theme));
+    return res.status(200).send(renderLinksPage(cardId, links, card.theme, card.storeName));
   } catch (err) {
     console.error(`Redirect lookup failed for cardId=${cardId}:`, err);
     return res.status(500).send('Internal error resolving card.');
