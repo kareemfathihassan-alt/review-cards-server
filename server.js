@@ -64,6 +64,7 @@ const PLATFORM_STYLES = {
   snapchat: { logoSlug: 'snapchat', icon: null, color: '#FFFC00', text: '#111111' },
   tiktok: { logoSlug: 'tiktok', icon: null, color: '#111111', text: '#ffffff' },
   whatsapp: { logoSlug: 'whatsapp', icon: null, color: '#25D366', text: '#ffffff' },
+  phone: { logoSlug: null, icon: '📞', color: '#34A853', text: '#ffffff' },
   menu: { logoSlug: null, icon: '📋', color: '#6b7280', text: '#ffffff' },
   website: { logoSlug: null, icon: '🌐', color: '#6b7280', text: '#ffffff' },
   other: { logoSlug: null, icon: '🔗', color: '#6b7280', text: '#ffffff' },
