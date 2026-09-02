@@ -271,6 +271,13 @@ app.get('/r/:cardId', async (req, res) => {
 
     res.set('Cache-Control', 'no-store');
 
+    // Fire-and-forget scan counting — doesn't block the redirect, so it
+    // never slows down the customer's experience.
+    const now = new Date();
+    const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    db.ref(`cards/${cardId}/scanCount`).transaction((cur) => (cur || 0) + 1).catch(() => {});
+    db.ref(`stats/monthly/${monthKey}`).transaction((cur) => (cur || 0) + 1).catch(() => {});
+
     if (links.length === 1) {
       return res.redirect(302, links[0].url);
     }
