@@ -300,7 +300,7 @@ app.get('/.well-known/assetlinks.json', (_req, res) => {
       target: {
         namespace: 'android_app',
         package_name: 'com.example.reviewcards',
-        sha256_cert_fingerprints: ['SHA256_FINGERPRINT_HERE'],
+        sha256_cert_fingerprints: ['71:0B:F8:D8:52:47:61:94:CF:B1:92:D3:F8:A5:D8:75:D1:65:8E:17:BC:D1:56:59:F4:C8:E8:E0:4A:AE:75:5F'],
       },
     },
   ]);
