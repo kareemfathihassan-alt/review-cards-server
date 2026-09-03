@@ -289,6 +289,23 @@ app.get('/r/:cardId', async (req, res) => {
   }
 });
 
+// Lets Android verify this app is allowed to auto-open for /r/... links,
+// so scanning your own cards opens the app instead of a browser.
+// SHA256_FINGERPRINT_HERE gets replaced with your app's real signing
+// fingerprint — see the setup notes for how to get it.
+app.get('/.well-known/assetlinks.json', (_req, res) => {
+  res.json([
+    {
+      relation: ['delegate_permission/common.handle_all_urls'],
+      target: {
+        namespace: 'android_app',
+        package_name: 'com.example.reviewcards',
+        sha256_cert_fingerprints: ['SHA256_FINGERPRINT_HERE'],
+      },
+    },
+  ]);
+});
+
 app.get('/healthz', (_req, res) => res.status(200).send('ok'));
 
 if (!process.env.VERCEL) {
