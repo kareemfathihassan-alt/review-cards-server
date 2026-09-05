@@ -129,10 +129,14 @@ const THEMES = {
   },
 };
 
-function renderLinksPage(cardId, links, themeName, storeName) {
+function renderLinksPage(cardId, links, themeName, storeName, logoUrl) {
   const theme = THEMES[themeName] || THEMES.light;
   const heading = storeName ? escapeHtml(storeName) : 'Choose an option';
   const initial = storeName ? escapeHtml(storeName.trim().charAt(0).toUpperCase()) : '📍';
+
+  const avatarHtml = logoUrl
+    ? `<img class="avatar" src="${escapeHtml(logoUrl)}" alt="" />`
+    : `<div class="avatar avatar-fallback">${initial}</div>`;
 
   const buttons = links
     .map((link) => {
@@ -172,6 +176,11 @@ function renderLinksPage(cardId, links, themeName, storeName) {
       width: 84px;
       height: 84px;
       border-radius: 50%;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      object-fit: cover;
+    }
+    .avatar-fallback {
       background: ${theme.avatarBg};
       display: flex;
       align-items: center;
@@ -179,8 +188,6 @@ function renderLinksPage(cardId, links, themeName, storeName) {
       font-size: 34px;
       font-weight: 700;
       color: #ffffff;
-      margin-bottom: 16px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
     }
     h1 {
       font-size: 22px;
@@ -238,7 +245,7 @@ function renderLinksPage(cardId, links, themeName, storeName) {
   </style>
 </head>
 <body>
-  <div class="avatar">${initial}</div>
+  ${avatarHtml}
   <h1>${heading}</h1>
   <p class="subtitle">Tap an option below</p>
   <div class="links">
@@ -282,7 +289,7 @@ app.get('/r/:cardId', async (req, res) => {
       return res.redirect(302, links[0].url);
     }
 
-    return res.status(200).send(renderLinksPage(cardId, links, card.theme, card.storeName));
+    return res.status(200).send(renderLinksPage(cardId, links, card.theme, card.storeName, card.logoUrl));
   } catch (err) {
     console.error(`Redirect lookup failed for cardId=${cardId}:`, err);
     return res.status(500).send('Internal error resolving card.');
