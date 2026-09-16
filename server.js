@@ -255,7 +255,169 @@ function renderLinksPage(cardId, links, themeName, storeName, logoUrl) {
 </html>`;
 }
 
-app.get('/r/:cardId', async (req, res) => {
+// 3 looks each for restaurants and cafes — restaurants lean elegant/premium,
+// cafes lean warm/cozy. Each just controls colors and font, no extra assets.
+const MENU_STYLES = {
+  'restaurant-0': { // elegant dark + gold
+    background: '#1a1a1a', heading: '#d4af37', cardBg: '#2a2a2a',
+    itemName: '#f5f5f5', itemPrice: '#d4af37', font: "'Playfair Display', Georgia, serif",
+  },
+  'restaurant-1': { // warm trattoria red
+    background: '#fdf6f0', heading: '#8b1e1e', cardBg: '#ffffff',
+    itemName: '#2a2a2a', itemPrice: '#8b1e1e', font: "'Poppins', sans-serif",
+  },
+  'restaurant-2': { // clean modern green
+    background: '#f7faf8', heading: '#1a1a1a', cardBg: '#ffffff',
+    itemName: '#1a1a1a', itemPrice: '#2e7d32', font: "'Poppins', sans-serif",
+  },
+  'cafe-0': { // cozy warm brown
+    background: '#f5ede1', heading: '#5c3d2e', cardBg: '#fffaf3',
+    itemName: '#3d2b1f', itemPrice: '#a9683d', font: "'Poppins', sans-serif",
+  },
+  'cafe-1': { // soft pastel
+    background: '#fdf2f8', heading: '#a45c8c', cardBg: '#ffffff',
+    itemName: '#3a2a35', itemPrice: '#d98ab3', font: "'Poppins', sans-serif",
+  },
+  'cafe-2': { // minimal orange accent
+    background: '#ffffff', heading: '#1a1a1a', cardBg: '#fafafa',
+    itemName: '#1a1a1a', itemPrice: '#e07a2c', font: "'Poppins', sans-serif",
+  },
+};
+
+function renderMenuPage(storeName, items, category, templateIndex) {
+  const styleKey = `${category === 'cafe' ? 'cafe' : 'restaurant'}-${[0, 1, 2].includes(templateIndex) ? templateIndex : 0}`;
+  const style = MENU_STYLES[styleKey];
+  const heading = storeName ? escapeHtml(storeName) : (category === 'cafe' ? 'Our Menu' : 'Our Menu');
+
+  const itemsHtml = items
+    .map((item) => {
+      const photoHtml = item.photoDataUri
+        ? `<img class="item-photo" src="${escapeHtml(item.photoDataUri)}" alt="" />`
+        : `<div class="item-photo item-photo-placeholder">🍽️</div>`;
+      return `
+      <div class="item">
+        ${photoHtml}
+        <div class="item-info">
+          <span class="item-name">${escapeHtml(item.name)}</span>
+          ${item.price ? `<span class="item-price">${escapeHtml(item.price)}</span>` : ''}
+        </div>
+      </div>`;
+    })
+    .join('\n');
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${heading}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: ${style.font};
+      background: ${style.background};
+      min-height: 100vh;
+      margin: 0;
+      padding: 40px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      color: ${style.heading};
+      font-size: 26px;
+      margin: 0 0 28px 0;
+      text-align: center;
+    }
+    .menu-list {
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .item {
+      display: flex;
+      align-items: center;
+      background: ${style.cardBg};
+      border-radius: 14px;
+      padding: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .item-photo {
+      width: 60px;
+      height: 60px;
+      border-radius: 10px;
+      object-fit: cover;
+      margin-right: 14px;
+      flex-shrink: 0;
+    }
+    .item-photo-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.05);
+      font-size: 24px;
+    }
+    .item-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+    .item-name {
+      color: ${style.itemName};
+      font-weight: 600;
+      font-size: 15px;
+    }
+    .item-price {
+      color: ${style.itemPrice};
+      font-weight: 700;
+      font-size: 15px;
+      margin-left: 12px;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>${heading}</h1>
+  <div class="menu-list">
+    ${itemsHtml}
+  </div>
+</body>
+</html>`;
+}
+
+app.get('/menu/:cardId', async (req, res) => {
+  const { cardId } = req.params;
+
+  if (!CARD_ID_PATTERN.test(cardId)) {
+    return res.status(400).send('Invalid card ID.');
+  }
+
+  try {
+    const [cardSnap, menuSnap] = await Promise.all([
+      db.ref(`cards/${cardId}`).get(),
+      db.ref(`menus/${cardId}`).get(),
+    ]);
+
+    if (!menuSnap.exists()) {
+      return res.status(404).send('No menu found for this card.');
+    }
+
+    const menu = menuSnap.val();
+    const storeName = cardSnap.exists() ? (cardSnap.val().storeName || '') : '';
+    const items = Array.isArray(menu.items) ? menu.items : [];
+
+    res.set('Cache-Control', 'no-store');
+    return res.status(200).send(renderMenuPage(storeName, items, menu.category, menu.templateIndex));
+  } catch (err) {
+    console.error(`Menu lookup failed for cardId=${cardId}:`, err);
+    return res.status(500).send('Internal error loading menu.');
+  }
+});
   const { cardId } = req.params;
 
   if (!CARD_ID_PATTERN.test(cardId)) {
