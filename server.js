@@ -418,6 +418,8 @@ app.get('/menu/:cardId', async (req, res) => {
     return res.status(500).send('Internal error loading menu.');
   }
 });
+
+app.get('/r/:cardId', async (req, res) => {
   const { cardId } = req.params;
 
   if (!CARD_ID_PATTERN.test(cardId)) {
