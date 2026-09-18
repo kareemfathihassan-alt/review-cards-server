@@ -293,7 +293,7 @@ function renderMenuPage(storeName, items, category, templateIndex) {
     .map((item) => {
       const photoHtml = item.photoDataUri
         ? `<img class="item-photo" src="${escapeHtml(item.photoDataUri)}" alt="" />`
-        : `<div class="item-photo item-photo-placeholder">🍽️</div>`;
+        : `<div class="item-photo item-photo-placeholder">${item.emoji ? escapeHtml(item.emoji) : '🍽️'}</div>`;
       return `
       <div class="item">
         ${photoHtml}
